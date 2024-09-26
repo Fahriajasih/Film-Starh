@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Film</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #333;
+            color: white;
+        }
+        .search-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .search-container input {
+            padding: 10px;
+            width: 200px;
+        }
+        .search-container button {
+            padding: 10px;
+        }
+        nav {
+            margin: 20px 0;
+            text-align: center;
+        }
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        #loginForm, #addFilmForm {
+            display: none;
+            margin-top: 20px;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        .movie {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            display: inline-block;
+            margin: 10px;
+            width: 188px;
+            position: relative;
+        }
+        .movie img {
+            width: 188px;
+            height: 268px;
+        }
+        .stars {
+            color: gold;
+        }
+        .deleteButton {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .movieContainer {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Filmku</h1>
+    <div>
+        <button id="profileButton" onclick="toggleLogin()">Profil</button>
+    </div>
+</header>
+
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="Cari film..." onkeyup="searchFilm()">
+    <button onclick="searchFilm()">Cari</button>
+</div>
+
+<nav>
+    <a href="#" onclick="showCategory('action')">Film Aksi</a>
+    <a href="#" onclick="showCategory('drama')">Film Drama</a>
+    <a href="#" onclick="showCategory('comedy')">Film Komedi</a>
+    <a href="#" onclick="showCategory('horror')">Film Horor</a>
+</nav>
+
+<div class="container" id="filmContainer">
+    <h2 id="categoryTitle">Film Aksi</h2>
+    <div id="action" class="movieContainer active"></div>
+    <div id="drama" class="movieContainer"></div>
+    <div id="comedy" class="movieContainer"></div>
+    <div id="horror" class="movieContainer"></div>
+</div>
+
+<div id="loginForm">
+    <h2>Login Admin</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Masuk</button>
+    <div id="loginMessage" style="color: red;"></div>
+</div>
+
+<div id="addFilmForm">
+    <h2>Tambah Film</h2>
+    <input type="text" id="filmTitle" placeholder="Judul Film">
+    <input type="text" id="filmImage" placeholder="Link Gambar (URL)">
+    <input type="text" id="filmVideo" placeholder="Link Video (URL)">
+    <input type="number" id="filmRating" placeholder="Rating (1-5)" min="1" max="5">
+    <select id="filmCategory">
+        <option value="action">Aksi</option>
+        <option value="drama">Drama</option>
+        <option value="comedy">Komedi</option>
+        <option value="horror">Horor</option>
+    </select>
+    <button onclick="addFilm()">Tambah Film</button>
+    <div id="addFilmMessage" style="color: green;"></div>
+</div>
+
+<script>
+    const adminUsername = 'admin'; 
+    const adminPassword = 'password123'; 
+    let isLoggedIn = false;
+
+    function toggleLogin() {
+        const loginForm = document.getElementById('loginForm');
+        const filmContainer = document.getElementById('filmContainer');
+        const addFilmForm = document.getElementById('addFilmForm');
+
+        if (isLoggedIn) {
+            isLoggedIn = false;
+            loginForm.style.display = 'none';
+            filmContainer.style.display = 'block'; 
+            addFilmForm.style.display = 'none'; 
+        } else {
+            loginForm.style.display = 'block';
+            filmContainer.style.display = 'none'; 
+            addFilmForm.style.display = 'none'; 
+        }
+    }
+
+    function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const loginMessage = document.getElementById('loginMessage');
+
+        if (username === adminUsername && password === adminPassword) {
+            isLoggedIn = true;
+            loginMessage.textContent = 'Login berhasil!';
+            loginMessage.style.color = 'green';
+            document.getElementById('addFilmForm').style.display = 'block'; 
+        } else {
+            loginMessage.textContent = 'Username atau password salah!';
+            loginMessage.style.color = 'red';
+        }
+    }
+
+    function addFilm() {
+        const title = document.getElementById('filmTitle').value;
+        const image = document.getElementById('filmImage').value;
+        const video = document.getElementById('filmVideo').value;
+        const rating = document.getElementById('filmRating').value;
+        const category = document.getElementById('filmCategory').value;
+        const addFilmMessage = document.getElementById('addFilmMessage');
+
+        if (title && image && video && rating) {
+            const movieContainer = document.getElementById(category);
+            const newMovieDiv = document.createElement('div');
+            newMovieDiv.className = 'movie';
+            newMovieDiv.onclick = function() { window.open(video, '_blank'); };
+            newMovieDiv.innerHTML = `
+                <img src="${image}" alt="${title}">
+                <h3>${title}</h3>
+                <div class="stars">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
+                <button class="deleteButton" onclick="deleteFilm(event, this)">Hapus</button>
+            `;
+            movieContainer.appendChild(newMovieDiv);
+            
+            document.getElementById('filmTitle').value = '';
+            document.getElementById('filmImage').value = '';
+            document.getElementById('filmVideo').value = '';
+            document.getElementById('filmRating').value = '';
+            addFilmMessage.textContent = 'Film berhasil ditambahkan!';
+            addFilmMessage.style.color = 'green';
+        } else {
+            addFilmMessage.textContent = 'Harap lengkapi semua field!';
+            addFilmMessage.style.color = 'red';
+        }
+    }
+
+    function deleteFilm(event, button) {
+        event.stopPropagation(); 
+        if (isLoggedIn) {
+            const movieDiv = button.parentElement;
+            movieDiv.remove();
+        } else {
+            alert('Hanya admin yang bisa menghapus film!');
+        }
+    }
+
+    function showCategory(category) {
+        const categories = ['action', 'drama', 'comedy', 'horror'];
+        const movieContainer = document.querySelectorAll('.movieContainer');
+
+        document.getElementById('categoryTitle').textContent = `Film ${category.charAt(0).toUpperCase() + category.slice(1)}`;
+        movieContainer.forEach(container => {
+            container.style.display = 'none'; 
+        });
+        document.getElementById(category).style.display = 'block'; 
+    }
+
+    function searchFilm() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const movies = document.querySelectorAll('.movie');
+
+        movies.forEach(movie => {
+            const title = movie.querySelector('h3').textContent.toLowerCase();
+            movie.style.display = title.includes(input) ? 'inline-block' : 'none'; 
+        });
+    }
+</script>
+
+</body>
+</html>
